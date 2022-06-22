@@ -16,7 +16,6 @@ public class DungeonSettings : ScriptableObject
     public int CorridorWidth = 3;
     [Min(0)]
     public int MaxSubChamberDetours = 2;
-    public int MaxAttempts = 5;
 
     public int seed;
 }

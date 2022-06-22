@@ -54,7 +54,7 @@ public class AStar
                     neighbour.GCost = tentativeGCost;
                     neighbour.HCost = Vector2Int.Distance(neighbour.Position, targetPosition);
                     neighbour.Parent = current;
-                    if(IsTraversable(neighbour) && !open.Contains(neighbour))
+                    if (IsTraversable(neighbour) && !open.Contains(neighbour))
                     {
                         open.Add(neighbour);
                     }
@@ -70,15 +70,15 @@ public class AStar
         List<Node> open = new();
         List<Node> closed = new();
         open.Add(nodes[startPosition]);
-        while(open.Count > 0)
+        while (open.Count > 0)
         {
-            Node current = open[0]; 
+            Node current = open[0];
             closed.Add(current);
             open.Remove(current);
             List<Node> neighbours = GetNeighbours(current);
-            foreach(Node neighbour in neighbours)
+            foreach (Node neighbour in neighbours)
             {
-                if(GetDistance(nodes[startPosition], neighbour) > range * 10 || closed.Contains(neighbour) || open.Contains(neighbour) || neighbour.occupyingElement != null )
+                if (GetDistance(nodes[startPosition], neighbour) > range * 10 || closed.Contains(neighbour) || open.Contains(neighbour) || neighbour.occupyingElement != null)
                 {
                     continue;
                 }
@@ -100,11 +100,11 @@ public class AStar
     private List<Node> GetNeighbours(Node currentNode)
     {
         List<Node> neighbours = new();
-        for(int x = -1; x <= 1; x++)
+        for (int x = -1; x <= 1; x++)
         {
-            for(int y = -1; y<= 1; y++)
+            for (int y = -1; y <= 1; y++)
             {
-                if(!canMoveDiagonally && Mathf.Abs(x) == Mathf.Abs(y) || x == 0 && y == 0 || !nodes.ContainsKey(currentNode.Position + new Vector2Int(x,y)))
+                if (!canMoveDiagonally && Mathf.Abs(x) == Mathf.Abs(y) || x == 0 && y == 0 || !nodes.ContainsKey(currentNode.Position + new Vector2Int(x, y)))
                 {
                     continue;
                 }
@@ -120,7 +120,7 @@ public class AStar
         int distanceY = Mathf.Abs(from.Position.y - to.Position.y);
         if (canMoveDiagonally)
         {
-            if(distanceX > distanceY)
+            if (distanceX > distanceY)
             {
                 return 10 * (distanceX - distanceY) + 14 * distanceY;
             }
@@ -128,6 +128,20 @@ public class AStar
         }
         return 10 * distanceX + 10 * distanceY;
     }
+}
+public class Node
+{
+    public Vector2Int Position;
+    public float GCost, HCost;
+    public float FCost { get { return GCost + HCost; } }
+    public Node Parent;
+    public GameObject occupyingElement = null;
 
-
+    public Node(Vector2Int position, Node parent, float gCost, float hCost)
+    {
+        Position = position;
+        Parent = parent;
+        GCost = gCost;
+        HCost = hCost;
+    }
 }
