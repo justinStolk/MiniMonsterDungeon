@@ -80,7 +80,7 @@ public abstract class State<T> : IState where T : MonoBehaviour
     }
     public virtual void OnEnter() { }
 
-    public void OnExit() { }
+    public virtual void OnExit() { }
 
-    public void OnUpdate() { }
+    public virtual void OnUpdate() { }
 }
