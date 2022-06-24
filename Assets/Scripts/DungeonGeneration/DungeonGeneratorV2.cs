@@ -44,17 +44,20 @@ public class DungeonGeneratorV2 : MonoBehaviour
         dungeonData.chambers.Add(entryChamber.RelativeRoomPosition, entryChamber);
 
         exitRoomRelativePosition = new Vector2Int(Random.Range(-settings.MaxHorizontalRoomOffset, settings.MaxHorizontalRoomOffset), settings.MaxVerticalRoomOffset);
+        Vector2Int exitPosition = new Vector2Int(exitRoomRelativePosition.x * (roomSize.x + settings.RoomDistance), exitRoomRelativePosition.y * (roomSize.y + settings.RoomDistance));
+        exitChamber = new Chamber(roomSize, exitPosition, exitRoomRelativePosition);
+        dungeonData.chambers.Add(exitChamber.RelativeRoomPosition, exitChamber);
     }
     private void ChainCoreRooms(DungeonData dungeonData)
     {
         int step = 0;
         Chamber current = entryChamber;
         List<Vector2Int> directions = new List<Vector2Int>() { Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down };
-        while (current.RelativeRoomPosition != exitRoomRelativePosition)
+        while (current != exitChamber)
         {
             Vector2Int roomTarget = directions[Random.Range(0, directions.Count)];
             Vector2Int relativeRoomPos = current.RelativeRoomPosition + roomTarget;
-            if (GetDistance(relativeRoomPos, exitRoomRelativePosition) > roomStepLimit - step || relativeRoomPos.x < -settings.MaxHorizontalRoomOffset || relativeRoomPos.x > settings.MaxHorizontalRoomOffset || relativeRoomPos.y < 0 || relativeRoomPos.y > settings.MaxVerticalRoomOffset || dungeonData.chambers.ContainsKey(relativeRoomPos))
+            if (GetDistance(relativeRoomPos, exitRoomRelativePosition) > roomStepLimit - step || relativeRoomPos.x < -settings.MaxHorizontalRoomOffset || relativeRoomPos.x > settings.MaxHorizontalRoomOffset || relativeRoomPos.y < 0 || relativeRoomPos.y > settings.MaxVerticalRoomOffset)
             {
                 directions.Remove(roomTarget);
                 if (directions.Count == 0)
@@ -66,20 +69,23 @@ public class DungeonGeneratorV2 : MonoBehaviour
             else
             {
                 step++;
-                if (relativeRoomPos == exitRoomRelativePosition)
+                if (relativeRoomPos == exitChamber.RelativeRoomPosition)
                 {
-                    Vector2Int roomPosition = new Vector2Int(current.Position.x + roomTarget.x * (roomSize.x + settings.RoomDistance), current.Position.y + roomTarget.y * (roomSize.y + settings.RoomDistance));
-                    Vector2Int newDimensions = new Vector2Int(settings.MaximumRoomWidth, settings.MaximumRoomHeight);
-                    exitChamber = new Chamber(newDimensions, roomPosition, exitRoomRelativePosition);
                     Debug.Log("Found the exit chamber!");
-                    dungeonData.chambers.Add(exitChamber.RelativeRoomPosition, exitChamber);
                     current.connectedChambers.Add(exitChamber);
                     return;
+                }else if (dungeonData.chambers.ContainsKey(relativeRoomPos))
+                {
+                    Chamber existingChamber = dungeonData.chambers[relativeRoomPos];
+                    if (!existingChamber.connectedChambers.Contains(current))
+                    {
+                        existingChamber.connectedChambers.Add(current);
+                    }
+                    current = existingChamber;
                 }
                 else
                 {
                     Vector2Int roomPosition = new Vector2Int(current.Position.x + roomTarget.x * (roomSize.x + settings.RoomDistance), current.Position.y + roomTarget.y * (roomSize.y + settings.RoomDistance));
-                    Vector2Int newDimensions = new Vector2Int(settings.MaximumRoomWidth, settings.MaximumRoomHeight);
                     Chamber newChamber;
                     if (Random.Range(0, 100) <= SpawnChamberSpawnChance)
                     {

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83d21f410ce1a5a40b8bf46150997964, type: 3}
   m_Name: B1F-B10F
   m_EditorClassIdentifier: 
-  RoomSpawnChance: 14
-  SubRoomIterations: 2
+  RoomSpawnChance: 12
+  SubRoomIterations: 3
   MinimumRoomWidth: 3
   MaximumRoomWidth: 5
   MinimumRoomHeight: 3
@@ -22,5 +22,5 @@ MonoBehaviour:
   MaxVerticalRoomOffset: 3
   RoomDistance: 4
   CorridorWidth: 3
-  MaxSubChamberDetours: 4
+  MaxSubChamberDetours: 6
   seed: 0
