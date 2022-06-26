@@ -8,11 +8,10 @@ public class DungeonGeneratorV2 : MonoBehaviour
     public DungeonSettings settings;
 
     [SerializeField] private float SpawnChamberSpawnChance;
-    private int roomStepLimit { get { return GetDistance(entryChamber.RelativeRoomPosition, exitRoomRelativePosition) + settings.MaxSubChamberDetours; } }
+    private int roomStepLimit { get { return GetDistance(entryChamber.RelativeRoomPosition, exitChamber.RelativeRoomPosition) + settings.MaxSubChamberDetours; } }
     private Chamber entryChamber;
     private Chamber exitChamber;
     private Vector2Int roomSize;
-    private Vector2Int exitRoomRelativePosition;
 
     public DungeonData dungeonData { get; private set; }
 
@@ -23,7 +22,7 @@ public class DungeonGeneratorV2 : MonoBehaviour
         {
             Random.InitState(settings.seed);
         }
-        roomSize = new Vector2Int(settings.MaximumRoomWidth, settings.MaximumRoomHeight);
+        roomSize = new Vector2Int(settings.RoomWidth, settings.RoomHeight);
         GenerateDungeon();
         GetComponent<DungeonBuilder>().BuildDungeon(dungeonData);
     }
@@ -40,12 +39,14 @@ public class DungeonGeneratorV2 : MonoBehaviour
 
     private void CreateCoreRooms(DungeonData dungeonData)
     {
-        entryChamber = new Chamber(roomSize, new Vector2Int(0,0), new Vector2Int(0, 0));
+        Vector2Int entryRelativePosition = new Vector2Int(Random.Range(0, settings.MaxDungeonWidth), 0);
+        Vector2Int entryPosition = new Vector2Int(entryRelativePosition.x * (roomSize.x + settings.RoomDistance), 0);
+        entryChamber = new Chamber(roomSize, entryPosition, entryRelativePosition);
         dungeonData.chambers.Add(entryChamber.RelativeRoomPosition, entryChamber);
 
-        exitRoomRelativePosition = new Vector2Int(Random.Range(-settings.MaxHorizontalRoomOffset, settings.MaxHorizontalRoomOffset), settings.MaxVerticalRoomOffset);
-        Vector2Int exitPosition = new Vector2Int(exitRoomRelativePosition.x * (roomSize.x + settings.RoomDistance), exitRoomRelativePosition.y * (roomSize.y + settings.RoomDistance));
-        exitChamber = new Chamber(roomSize, exitPosition, exitRoomRelativePosition);
+        Vector2Int exitRelativePosition = new Vector2Int(Random.Range(0, settings.MaxDungeonWidth), settings.MaxDungeonHeight - 1);
+        Vector2Int exitPosition = new Vector2Int(exitRelativePosition.x * (roomSize.x + settings.RoomDistance), exitRelativePosition.y * (roomSize.y + settings.RoomDistance));
+        exitChamber = new Chamber(roomSize, exitPosition, exitRelativePosition);
         dungeonData.chambers.Add(exitChamber.RelativeRoomPosition, exitChamber);
     }
     private void ChainCoreRooms(DungeonData dungeonData)
@@ -57,7 +58,7 @@ public class DungeonGeneratorV2 : MonoBehaviour
         {
             Vector2Int roomTarget = directions[Random.Range(0, directions.Count)];
             Vector2Int relativeRoomPos = current.RelativeRoomPosition + roomTarget;
-            if (GetDistance(relativeRoomPos, exitRoomRelativePosition) > roomStepLimit - step || relativeRoomPos.x < -settings.MaxHorizontalRoomOffset || relativeRoomPos.x > settings.MaxHorizontalRoomOffset || relativeRoomPos.y < 0 || relativeRoomPos.y > settings.MaxVerticalRoomOffset)
+            if (GetDistance(relativeRoomPos, exitChamber.RelativeRoomPosition) > roomStepLimit - step || relativeRoomPos.x < 0 || relativeRoomPos.x >= settings.MaxDungeonWidth || relativeRoomPos.y < 0 || relativeRoomPos.y >= settings.MaxDungeonHeight)
             {
                 directions.Remove(roomTarget);
                 if (directions.Count == 0)
@@ -86,15 +87,7 @@ public class DungeonGeneratorV2 : MonoBehaviour
                 else
                 {
                     Vector2Int roomPosition = new Vector2Int(current.Position.x + roomTarget.x * (roomSize.x + settings.RoomDistance), current.Position.y + roomTarget.y * (roomSize.y + settings.RoomDistance));
-                    Chamber newChamber;
-                    if (Random.Range(0, 100) <= SpawnChamberSpawnChance)
-                    {
-                        newChamber = new SpawnChamber(roomSize, roomPosition, relativeRoomPos);
-                    }
-                    else
-                    {
-                        newChamber = new Chamber(roomSize, roomPosition, relativeRoomPos);
-                    }
+                    Chamber newChamber = CreateChamber(roomSize, roomPosition, relativeRoomPos);
                     newChamber.connectedChambers.Add(current);
                     dungeonData.chambers.Add(relativeRoomPos, newChamber);
                     current = newChamber;
@@ -146,7 +139,7 @@ public class DungeonGeneratorV2 : MonoBehaviour
                 foreach (Vector2Int direction in directions)
                 {
                     Vector2Int targetPosition = direction + parent.RelativeRoomPosition;
-                    if (targetPosition.x < -settings.MaxHorizontalRoomOffset || targetPosition.x > settings.MaxHorizontalRoomOffset || targetPosition.y < 0 || targetPosition.y > settings.MaxVerticalRoomOffset)
+                    if (targetPosition.x < 0 || targetPosition.x >= settings.MaxDungeonWidth || targetPosition.y < 0 || targetPosition.y >= settings.MaxDungeonHeight)
                     {
                         continue;
                     }
@@ -155,16 +148,8 @@ public class DungeonGeneratorV2 : MonoBehaviour
                         if (!dungeonData.chambers.ContainsKey(targetPosition))
                         {
                             Vector2Int roomPosition = new Vector2Int(pair.Value.Position.x + (roomSize.x + settings.RoomDistance) * direction.x, pair.Value.Position.y + (roomSize.y + settings.RoomDistance) * direction.y);
-                            Vector2Int newDimensions = new Vector2Int(settings.MaximumRoomWidth, settings.MaximumRoomHeight);
-                            Chamber subRoom;
-                            if (Random.Range(0, 100) <= SpawnChamberSpawnChance)
-                            {
-                                subRoom = new SpawnChamber(newDimensions, roomPosition, targetPosition);
-                            }
-                            else
-                            {
-                                subRoom = new Chamber(newDimensions, roomPosition, targetPosition);
-                            }
+                            Vector2Int newDimensions = new Vector2Int(settings.RoomWidth, settings.RoomHeight);
+                            Chamber subRoom = CreateChamber(roomSize, roomPosition, targetPosition);
                             parent.connectedChambers.Add(subRoom);
                             subRooms.Add(subRoom);
                         }
@@ -199,19 +184,19 @@ public class DungeonGeneratorV2 : MonoBehaviour
                         Vector2Int position = Vector2Int.zero;
                         if (chamber.RelativeRoomPosition.x > neighbour.RelativeRoomPosition.x)
                         {
-                            position = new Vector2Int(chamber.RelativeRoomPosition.x * (settings.MaximumRoomWidth + settings.RoomDistance) - rw, chamber.RelativeRoomPosition.y * (settings.MaximumRoomHeight + settings.RoomDistance) + Mathf.RoundToInt(settings.MaximumRoomHeight / 2) - Mathf.FloorToInt(settings.CorridorWidth/2) + (w - 1));
+                            position = new Vector2Int(chamber.RelativeRoomPosition.x * (settings.RoomWidth + settings.RoomDistance) - rw, chamber.RelativeRoomPosition.y * (settings.RoomHeight + settings.RoomDistance) + Mathf.RoundToInt(settings.RoomHeight / 2) - Mathf.FloorToInt(settings.CorridorWidth/2) + (w - 1));
                         }
                         if (chamber.RelativeRoomPosition.x < neighbour.RelativeRoomPosition.x)
                         {
-                            position = new Vector2Int(chamber.RelativeRoomPosition.x * (settings.MaximumRoomWidth + settings.RoomDistance) + settings.MaximumRoomWidth + (rw - 1), chamber.RelativeRoomPosition.y * (settings.MaximumRoomHeight + settings.RoomDistance) + Mathf.RoundToInt(settings.MaximumRoomHeight / 2) - Mathf.FloorToInt(settings.CorridorWidth / 2) + (w - 1));
+                            position = new Vector2Int(chamber.RelativeRoomPosition.x * (settings.RoomWidth + settings.RoomDistance) + settings.RoomWidth + (rw - 1), chamber.RelativeRoomPosition.y * (settings.RoomHeight + settings.RoomDistance) + Mathf.RoundToInt(settings.RoomHeight / 2) - Mathf.FloorToInt(settings.CorridorWidth / 2) + (w - 1));
                         }
                         if (chamber.RelativeRoomPosition.y > neighbour.RelativeRoomPosition.y)
                         {
-                            position = new Vector2Int(chamber.RelativeRoomPosition.x * (settings.MaximumRoomWidth + settings.RoomDistance) + Mathf.RoundToInt(settings.MaximumRoomWidth / 2) - Mathf.FloorToInt(settings.CorridorWidth/2) + (w - 1), chamber.RelativeRoomPosition.y * (settings.MaximumRoomHeight + settings.RoomDistance) - rw);
+                            position = new Vector2Int(chamber.RelativeRoomPosition.x * (settings.RoomWidth + settings.RoomDistance) + Mathf.RoundToInt(settings.RoomWidth / 2) - Mathf.FloorToInt(settings.CorridorWidth/2) + (w - 1), chamber.RelativeRoomPosition.y * (settings.RoomHeight + settings.RoomDistance) - rw);
                         }
                         if (chamber.RelativeRoomPosition.y < neighbour.RelativeRoomPosition.y)
                         {
-                            position = new Vector2Int(chamber.RelativeRoomPosition.x * (settings.MaximumRoomWidth + settings.RoomDistance) + Mathf.RoundToInt(settings.MaximumRoomWidth / 2) - Mathf.FloorToInt(settings.CorridorWidth / 2) + (w - 1), chamber.RelativeRoomPosition.y * (settings.MaximumRoomHeight + settings.RoomDistance) + settings.MaximumRoomHeight + (rw - 1));
+                            position = new Vector2Int(chamber.RelativeRoomPosition.x * (settings.RoomWidth + settings.RoomDistance) + Mathf.RoundToInt(settings.RoomWidth / 2) - Mathf.FloorToInt(settings.CorridorWidth / 2) + (w - 1), chamber.RelativeRoomPosition.y * (settings.RoomHeight + settings.RoomDistance) + settings.RoomHeight + (rw - 1));
                         }
                         if (!dungeonData.corridors.Contains(position))
                         {
@@ -224,7 +209,10 @@ public class DungeonGeneratorV2 : MonoBehaviour
         }
     }
 
-
+    private Chamber CreateChamber(Vector2Int dimensions, Vector2Int position, Vector2Int relativePosition)
+    {
+        return new Chamber(dimensions, position, relativePosition);
+    }
 
     private int GetDistance(Vector2Int from, Vector2Int to)
     {

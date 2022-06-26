@@ -12,14 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83d21f410ce1a5a40b8bf46150997964, type: 3}
   m_Name: B1F-B10F
   m_EditorClassIdentifier: 
-  RoomSpawnChance: 12
+  RoomSpawnChance: 15
   SubRoomIterations: 3
-  MinimumRoomWidth: 3
-  MaximumRoomWidth: 5
-  MinimumRoomHeight: 3
-  MaximumRoomHeight: 5
-  MaxHorizontalRoomOffset: 1
-  MaxVerticalRoomOffset: 3
+  RoomWidth: 5
+  RoomHeight: 5
+  MaxDungeonWidth: 4
+  MaxDungeonHeight: 4
   RoomDistance: 4
   CorridorWidth: 3
   MaxSubChamberDetours: 6

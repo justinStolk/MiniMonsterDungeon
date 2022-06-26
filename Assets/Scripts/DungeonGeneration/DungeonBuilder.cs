@@ -5,16 +5,18 @@ using UnityEngine;
 public class DungeonBuilder : MonoBehaviour
 {
     [Header("Prefabs")]
-    public GameObject floorPrefab;
-    public GameObject corridorPrefab;
-    public GameObject doorwayPrefab;
-    public GameObject moveRangePrefab;
-    public GameObject attackRangePrefab;
-    //public GameObject testUnit;
-    public GameObject wallSidePrefab;
-    public GameObject wallTopPrefab;
+    public GameObject FloorPrefab;
+    public GameObject CorridorPrefab;
+    public GameObject EntryPrefab;
+    public GameObject ExitPrefab;
+    public GameObject MoveRangePrefab;
+    public GameObject AttackRangePrefab;
+    public GameObject Player;
+    public GameObject WallSidePrefab;
+    public GameObject WallTopPrefab;
 
     public DungeonData data;
+
     private GameObject dungeonParent;
 
     public void BuildDungeon(DungeonData dungeonData)
@@ -48,19 +50,19 @@ public class DungeonBuilder : MonoBehaviour
 
         foreach (Vector2Int pos in data.tiles)
         {
-            Instantiate(floorPrefab, new Vector3(pos.x, pos.y, 0), Quaternion.identity, roomFloors.transform);
+            Instantiate(FloorPrefab, new Vector3(pos.x, pos.y, 0), Quaternion.identity, roomFloors.transform);
         }
         foreach (Vector2Int pos in data.corridors)
         {
-            Instantiate(corridorPrefab, new Vector3(pos.x, pos.y, 0), Quaternion.identity, corridorFloors.transform);
+            Instantiate(CorridorPrefab, new Vector3(pos.x, pos.y, 0), Quaternion.identity, corridorFloors.transform);
         }
         foreach (KeyValuePair<Vector2Int, Node> pair in data.nodes)
         {
-            GameObject rangeTile = Instantiate(moveRangePrefab, new Vector3(pair.Key.x, pair.Key.y, 0), Quaternion.identity, rangeTileParent.transform);
+            GameObject rangeTile = Instantiate(MoveRangePrefab, new Vector3(pair.Key.x, pair.Key.y, 0), Quaternion.identity, rangeTileParent.transform);
             data.moveRangeTiles.Add(pair.Key, rangeTile);
             rangeTile.SetActive(false);
 
-            GameObject attackTile = Instantiate(attackRangePrefab, new Vector3(pair.Key.x, pair.Key.y, 0), Quaternion.identity, attackTileParent.transform);
+            GameObject attackTile = Instantiate(AttackRangePrefab, new Vector3(pair.Key.x, pair.Key.y, 0), Quaternion.identity, attackTileParent.transform);
             data.attackRangeTiles.Add(pair.Key, attackTile);
             attackTile.SetActive(false);
         }
@@ -105,16 +107,20 @@ public class DungeonBuilder : MonoBehaviour
         }
         foreach(Vector2Int d in data.doors)
         {
-            Instantiate(doorwayPrefab, new Vector3(d.x, d.y, 0), Quaternion.identity, walls.transform);
-            //if(d.y < 0)
-            //{
-            //    GameObject unit = Instantiate(testUnit, new Vector3(d.x, d.y, 0), Quaternion.identity);
-            //    data.nodes[d].occupyingElement = unit; 
-            //}
+            if (d.y < 0)
+            {
+                Instantiate(EntryPrefab, new Vector3(d.x, d.y, 0), Quaternion.identity, walls.transform);
+                GameObject unit = Instantiate(Player, new Vector3(d.x, d.y, 0), Quaternion.identity);
+                data.nodes[d].occupyingElement = unit;
+            }
+            else
+            {
+                Instantiate(ExitPrefab, new Vector3(d.x, d.y, 0), Quaternion.identity, walls.transform);
+            }
         }
         foreach (Vector2Int t in topWalls)
         {
-            Instantiate(wallTopPrefab, new Vector3(t.x, t.y, 0), Quaternion.identity, walls.transform);
+            Instantiate(WallTopPrefab, new Vector3(t.x, t.y, 0), Quaternion.identity, walls.transform);
             Vector2Int below = t - Vector2Int.up;
             if (sideWalls.Contains(below))
             {
@@ -122,17 +128,17 @@ public class DungeonBuilder : MonoBehaviour
                 Vector2Int rightSide = t + Vector2Int.right;
                 if (!data.nodes.ContainsKey(leftSide) && !sideWalls.Contains(leftSide) && !topWalls.Contains(leftSide))
                 {
-                    Instantiate(wallTopPrefab, new Vector3(leftSide.x, leftSide.y, 0), Quaternion.identity, walls.transform);
+                    Instantiate(WallTopPrefab, new Vector3(leftSide.x, leftSide.y, 0), Quaternion.identity, walls.transform);
                 }
                 if (!data.nodes.ContainsKey(rightSide) && !sideWalls.Contains(rightSide) && !topWalls.Contains(rightSide))
                 {
-                    Instantiate(wallTopPrefab, new Vector3(rightSide.x, rightSide.y, 0), Quaternion.identity, walls.transform);
+                    Instantiate(WallTopPrefab, new Vector3(rightSide.x, rightSide.y, 0), Quaternion.identity, walls.transform);
                 }
             }
         }
         foreach (Vector2Int s in sideWalls)
         {
-            Instantiate(wallSidePrefab, new Vector3(s.x, s.y, 0), Quaternion.identity, walls.transform);
+            Instantiate(WallSidePrefab, new Vector3(s.x, s.y, 0), Quaternion.identity, walls.transform);
             Vector2Int above = s + Vector2Int.up;
             if (topWalls.Contains(above))
             {
@@ -140,11 +146,11 @@ public class DungeonBuilder : MonoBehaviour
                 Vector2Int rightSide = s + Vector2Int.right;
                 if (!data.nodes.ContainsKey(leftSide) && !sideWalls.Contains(leftSide) && !topWalls.Contains(leftSide))
                 {
-                    Instantiate(wallSidePrefab, new Vector3(leftSide.x, leftSide.y, 0), Quaternion.identity, walls.transform);
+                    Instantiate(WallSidePrefab, new Vector3(leftSide.x, leftSide.y, 0), Quaternion.identity, walls.transform);
                 }
                 if (!data.nodes.ContainsKey(rightSide) && !sideWalls.Contains(rightSide) && !topWalls.Contains(rightSide))
                 {
-                    Instantiate(wallSidePrefab, new Vector3(rightSide.x, rightSide.y, 0), Quaternion.identity, walls.transform);
+                    Instantiate(WallSidePrefab, new Vector3(rightSide.x, rightSide.y, 0), Quaternion.identity, walls.transform);
                 }
             }
         }
