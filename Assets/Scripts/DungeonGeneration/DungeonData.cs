@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class DungeonData
 {
+
+    public static DungeonData PublicData;
+
     public int CurrentFloor = 1;
 
     //public Dictionary<Vector2Int, Navigator> units = new();

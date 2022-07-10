@@ -13,6 +13,11 @@ public class AStar
         canMoveDiagonally = CanMoveDiagonally;
     }
 
+    public AStar(bool CanMoveDiagonally)
+    {
+        canMoveDiagonally = CanMoveDiagonally;
+    }
+
     public List<Vector2Int> FindPathToTarget(Vector2Int startPosition, Vector2Int targetPosition)
     {
         List<Node> open = new();

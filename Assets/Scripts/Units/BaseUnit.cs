@@ -8,7 +8,7 @@ public class BaseUnit : MonoBehaviour
     public int Health;
     public int Attack;
     public int Armor;
-    
+    public int MoveRange;
 
     // Start is called before the first frame update
     void Start()

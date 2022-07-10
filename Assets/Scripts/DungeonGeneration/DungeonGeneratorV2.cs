@@ -16,7 +16,7 @@ public class DungeonGeneratorV2 : MonoBehaviour
     public DungeonData dungeonData { get; private set; }
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         if(settings.seed != 0)
         {

@@ -36,6 +36,7 @@ public class DungeonBuilder : MonoBehaviour
                 data.nodes[spawn.SpawnerPosition].occupyingElement = spawnedSpawner;
             }
         }
+        DungeonData.PublicData = data;
     }
     private void BuildTiles()
     {
@@ -111,6 +112,7 @@ public class DungeonBuilder : MonoBehaviour
             {
                 Instantiate(EntryPrefab, new Vector3(d.x, d.y, 0), Quaternion.identity, walls.transform);
                 GameObject unit = Instantiate(Player, new Vector3(d.x, d.y, 0), Quaternion.identity);
+                GameManager.Instance.Player = unit.GetComponent<Player>();
                 data.nodes[d].occupyingElement = unit;
             }
             else
