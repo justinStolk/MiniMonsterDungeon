@@ -27,7 +27,7 @@ public class BattleSystem : MonoBehaviour
     public void ApplyBattleCalculation(BaseUnit attacker, BaseUnit defender)
     {
         int damage = Mathf.Clamp(attacker.Attack - defender.Armor, 0, 999);
-        defender.ChangeHealth(-damage);
+        //defender.ChangeHealth(-damage);
     }
 
 }

@@ -10,11 +10,14 @@ public class PlayerTurnState : State<GameManager>
     private Vector2Int cursorPosition;
 
     private bool playerSelected;
+    private bool primedForAttack;
 
     public PlayerTurnState(GameManager owner) : base(owner)
     {
         Owner = owner;
         EventSystem.Subscribe(EventType.ON_PLAYER_TURN_ENDED, () => turnEnded = true);
+        //EventSystem.Subscribe(EventType.ON_PLAYER_TURN_ENDED, () => Debug.Log(turnEnded));
+        EventSystem.Subscribe(EventType.ON_PRIMED_FOR_ATTACK, () => primedForAttack = true);
     }
 
     public override void OnEnter()
@@ -54,24 +57,48 @@ public class PlayerTurnState : State<GameManager>
     private void OnClickCommand()
     {
         Debug.Log("I received a click!");
-        if (DungeonData.PublicData.nodes.ContainsKey(cursorPosition))
+        if (!DungeonData.PublicData.nodes.ContainsKey(cursorPosition))
         {
-            if(DungeonData.PublicData.nodes[cursorPosition].occupyingElement == player.gameObject)
-            {
-                playerSelected = player.OnSelected();
-                Debug.Log("You've clicked on the player!");
-            }
-            if(playerSelected && DungeonData.PublicData.nodes[cursorPosition].occupyingElement == null)
-            {
-                if(DungeonData.PublicData.nodes[cursorPosition].occupyingElement == null)
-                {
-                    player.MoveToTile(cursorPosition);
-                }
-                playerSelected = false;
-                player.OnDeselected();
-            }
+            return;
+        }
+
+        if (playerSelected)
+        {
+            SetTarget();
+        }
+        else
+        {
+            SelectPlayer();
         }
     }
+
+    private void SelectPlayer()
+    {
+        if (DungeonData.PublicData.nodes[cursorPosition].occupyingElement == player.gameObject)
+        {
+            playerSelected = player.OnSelected();
+            Debug.Log("You've clicked on the player!");
+        }
+    }
+
+    private void SetTarget()
+    {
+        if(primedForAttack)
+        {
+            Enemy target = DungeonData.PublicData.nodes[cursorPosition].occupyingElement.GetComponent<Enemy>();
+            if(target != null)
+            {
+                //player.TryAttackingEnemy(target);
+                primedForAttack = false;
+            }
+        }else if(playerSelected && DungeonData.PublicData.nodes[cursorPosition].occupyingElement == null)
+        {
+            player.MoveToTile(cursorPosition);
+            playerSelected = false;
+            player.OnDeselected();
+        }
+    }
+
 
     private void OnMenuToggle()
     {

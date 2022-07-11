@@ -35,7 +35,6 @@ public class StateMachine
     {
         currentState?.OnExit();
         currentState = newState;
-        Debug.Log(newState.GetType().ToString());
         activeTransitions = allTransitions.FindAll(trn => trn.FromState == currentState || trn.FromState == null);
         currentState.OnEnter();
     }

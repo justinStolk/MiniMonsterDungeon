@@ -10,6 +10,6 @@ public class DamageEffect : ConsumableEffect
 
     public override void ApplyEffect(BaseUnit target)
     {
-        target.ChangeHealth(-damageAmount);
+        target.TakeAttack(damageAmount);
     }
 }

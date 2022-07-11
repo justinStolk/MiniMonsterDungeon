@@ -2,17 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DungeonExitState : MonoBehaviour
+public class DungeonExitState : State<GameManager>
 {
-    // Start is called before the first frame update
-    void Start()
+
+    private bool exited;
+    public DungeonExitState(GameManager owner) : base(owner)
     {
-        
+        Owner = owner;
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void OnEnter()
     {
-        
+        Owner.PlayerDied = false;
+        UnityEngine.SceneManagement.SceneManager.LoadScene("PreparationMenu");
+        exited = true;
     }
+
+    public override void OnExit()
+    {
+        exited = false;
+    }
+    public bool Exited()
+    {
+        return exited;
+    }
+
 }

@@ -12,6 +12,7 @@ public class DungeonBuilder : MonoBehaviour
     public GameObject MoveRangePrefab;
     public GameObject AttackRangePrefab;
     public GameObject Player;
+    public Enemy EnemyPrefab;
     public GameObject WallSidePrefab;
     public GameObject WallTopPrefab;
 
@@ -30,10 +31,11 @@ public class DungeonBuilder : MonoBehaviour
             if(pair.Value.GetType() == typeof(SpawnChamber))
             {
                 SpawnChamber spawn = (SpawnChamber)pair.Value;
-                Debug.Log("I found a Spawn Chamber at position: " + pair.Value.Position);
-                GameObject spawner = Resources.Load("Objects/Spawner") as GameObject;
-                GameObject spawnedSpawner = Instantiate(spawner, new Vector3(spawn.SpawnerPosition.x, spawn.SpawnerPosition.y, 0), Quaternion.identity);
-                data.nodes[spawn.SpawnerPosition].occupyingElement = spawnedSpawner;
+                //Debug.Log("I found a Spawn Chamber at position: " + pair.Value.Position);
+                //GameObject spawner = Resources.Load("Objects/Spawner") as GameObject;
+                //GameObject spawnedSpawner = Instantiate(spawner, new Vector3(spawn.SpawnerPosition.x, spawn.SpawnerPosition.y, 0), Quaternion.identity);
+                Enemy spawnedEnemy = Instantiate(EnemyPrefab, new Vector3(spawn.SpawnerPosition.x, spawn.SpawnerPosition.y, 0), Quaternion.identity);
+                data.nodes[spawn.SpawnerPosition].occupyingElement = spawnedEnemy.gameObject;
             }
         }
         DungeonData.PublicData = data;

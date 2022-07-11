@@ -10,6 +10,6 @@ public class HealEffect : ConsumableEffect
 
     public override void ApplyEffect(BaseUnit target)
     {
-        target.ChangeHealth(healAmount);
+        target.Heal(healAmount);
     }
 }

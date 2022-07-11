@@ -38,12 +38,10 @@ public class AStar
                 result.Add(current.Position);
                 while (current.Position != startPosition)
                 {
-                    Debug.Log("Adding parent position to path");
                     result.Add(current.Parent.Position);
                     current = current.Parent;
                 }
                 result.Reverse();
-                Debug.Log("Returned result!");
                 return result;
             }
             List<Node> neighbours = GetNeighbours(current);
@@ -94,6 +92,30 @@ public class AStar
         }
 
         return result;
+    }
+
+    public Vector2Int FindClosestTo(Vector2Int from, Vector2Int target)
+    {
+        if (!nodes.ContainsKey(target) || !nodes.ContainsKey(from))
+        {
+            throw new System.Exception("Attempted to target or move from a node that doesn't exist! This can't be done");
+        }
+        Node current = nodes[target];
+        while(current.occupyingElement != null)
+        {
+            List<Node> neighbours = GetNeighbours(current);
+            float distance = float.MaxValue;
+            foreach(Node n in neighbours)
+            {
+                float calculatedDistance = GetDistance(nodes[from], n);
+                if(calculatedDistance < distance)
+                {
+                    distance = calculatedDistance;
+                    current = n;
+                }
+            }
+        }
+        return current.Position;
     }
 
 

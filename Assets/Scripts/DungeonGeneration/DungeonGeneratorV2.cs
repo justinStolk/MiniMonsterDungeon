@@ -72,7 +72,6 @@ public class DungeonGeneratorV2 : MonoBehaviour
                 step++;
                 if (relativeRoomPos == exitChamber.RelativeRoomPosition)
                 {
-                    Debug.Log("Found the exit chamber!");
                     current.connectedChambers.Add(exitChamber);
                     return;
                 }else if (dungeonData.chambers.ContainsKey(relativeRoomPos))
@@ -211,7 +210,7 @@ public class DungeonGeneratorV2 : MonoBehaviour
 
     private Chamber CreateChamber(Vector2Int dimensions, Vector2Int position, Vector2Int relativePosition)
     {
-        return new Chamber(dimensions, position, relativePosition);
+        return Random.Range(0, 101) <= SpawnChamberSpawnChance ? new SpawnChamber(dimensions, position, relativePosition) : new Chamber(dimensions, position, relativePosition);
     }
 
     private int GetDistance(Vector2Int from, Vector2Int to)

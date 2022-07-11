@@ -32,6 +32,9 @@ public class UIManager : MonoBehaviour
         dungeonMenu.SetActive(false);
         EventSystem.Subscribe(EventType.ON_PLAYER_MOVED, () => waitButton.gameObject.SetActive(true));
         EventSystem.Subscribe(EventType.ON_DUNGEON_MENU_TOGGLED, () => dungeonMenu.SetActive(!dungeonMenu.activeSelf));
+        EventSystem.Subscribe(EventType.ON_PLAYER_TURN_ENDED, () => dungeonMenu.SetActive(false));
+        EventSystem.Subscribe(EventType.ON_ENEMY_IN_RANGE, () => attackButton.gameObject.SetActive(true));
+        EventSystem.Subscribe(EventType.ON_ACTION_EXECUTED, () => { attackButton.gameObject.SetActive(false); waitButton.gameObject.SetActive(false); });
     }
 
     // Update is called once per frame
@@ -40,10 +43,20 @@ public class UIManager : MonoBehaviour
         
     }
 
+    public void EndPlayerTurn()
+    {
+        EventSystem.CallEvent(EventType.ON_PLAYER_TURN_ENDED);
+    }
+
     public void ConfirmPlayerMovement()
     {
         waitButton.gameObject.SetActive(false);
-        EventSystem.CallEvent(EventType.ON_PLAYER_MOVE_CONFIRMED);
+        EventSystem.CallEvent(EventType.ON_ACTION_EXECUTED);
+    }
+    public void CallForAttack()
+    {
+        EventSystem.CallEvent(EventType.ON_PLAYER_ATTACK);
+        EventSystem.CallEvent(EventType.ON_ACTION_EXECUTED);
     }
 
     public void UpdateBattleForecast(int expectedDamage, int healthToDisplay)
